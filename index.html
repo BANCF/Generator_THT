@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trình Ra Đề & Sinh Testcase Tin Học Trẻ</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- CSS Styles -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- JSZip Library for Zipping files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body class="dark-theme">
+  <!-- Top Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <i class="bi bi-code-slash logo-icon"></i>
+        <span>Informatics Contest <strong class="logo-accent">Creator</strong></span>
+      </div>
+      <div class="nav-actions">
+        <button id="theme-toggle" class="btn btn-icon" title="Đổi giao diện Sáng/Tối">
+          <i class="bi bi-sun"></i>
+        </button>
+        <a href="file:///C:/Users/Admin/.gemini/antigravity/scratch/Dethimau_extracted.txt" target="_blank" class="btn btn-secondary">
+          <i class="bi bi-file-earmark-text"></i> Xem File Mẫu
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="app-container">
+    
+    <!-- Left Panel: Problem Configuration -->
+    <section class="panel editor-panel">
+      <div class="panel-header">
+        <h2><i class="bi bi-sliders"></i> Cấu hình đề thi nhanh</h2>
+      </div>
+      
+      <div class="panel-body">
+        <!-- Main Quick Config Card -->
+        <div class="generator-variables-card">
+          <div class="form-group">
+            <label for="problem-level">Khối thi / Cấp học</label>
+            <select id="problem-level" class="form-select">
+              <option value="cap1">Tiểu học (Cấp 1 - Lập trình Scratch)</option>
+              <option value="cap2" selected>THCS (Cấp 2 - Lập trình C++ / Python)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="template-select">Chọn Dạng đề bài ôn luyện</label>
+            <select id="template-select" class="form-select">
+              <!-- Dynamically populated based on Level -->
+            </select>
+          </div>
+          
+          <div class="form-group" id="variation-select-group">
+            <label for="variation-select">Chọn Biến thể / Kiểu đề bài</label>
+            <select id="variation-select" class="form-select">
+              <!-- Dynamically populated based on selected Template -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="problem-num-tests">Số lượng testcase sinh ra (Tối thiểu 10)</label>
+            <input type="number" id="problem-num-tests" class="form-control" min="10" max="50" value="10">
+          </div>
+
+          <button type="button" id="trigger-generation-btn" class="btn btn-primary btn-block">
+            <i class="bi bi-lightning-charge-fill"></i> SINH ĐỀ BÀI & TẢI BỘ TESTCASE
+          </button>
+        </div>
+
+        <!-- AI Generator Card (Ollama Only) -->
+        <div class="generator-variables-card ai-generator-card">
+          <div class="ai-card-title">
+            <i class="bi bi-robot"></i> <span>Sinh đề thi mới bằng Ollama (AI Cục bộ)</span>
+          </div>
+
+          <!-- Hidden provider select to maintain JavaScript compatibility -->
+          <select id="ai-provider" style="display: none;">
+            <option value="custom" selected>Ollama/Custom</option>
+          </select>
+          
+          <div class="form-row">
+            <div class="form-group col-6" id="ai-endpoint-group">
+              <label for="ai-endpoint">Địa chỉ API Endpoint</label>
+              <input type="text" id="ai-endpoint" class="form-control" value="http://localhost:11434/v1" placeholder="Ví dụ: http://localhost:11434/v1">
+            </div>
+            <div class="form-group col-6">
+              <label for="ai-model-select">Model AI</label>
+              <select id="ai-model-select" class="form-select">
+                <!-- Dynamically populated based on Ollama / API -->
+              </select>
+              <input type="text" id="ai-model-custom" class="form-control" style="display: none; margin-top: 8px;" placeholder="Nhập model tùy chỉnh...">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ai-key">API Key (Không bắt buộc)</label>
+            <input type="password" id="ai-key" class="form-control" placeholder="Nhập API Key của bạn (nếu dùng qua Proxy bảo mật)">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="ai-level">Khối thi / Cấp học</label>
+              <select id="ai-level" class="form-select">
+                <option value="cap1">Tiểu học (Cấp 1 - Scratch)</option>
+                <option value="cap2" selected>THCS (Cấp 2 - C++ / Python)</option>
+              </select>
+            </div>
+            <div class="form-group col-6">
+              <label for="ai-topic">Chủ đề bài toán</label>
+              <select id="ai-topic" class="form-select">
+                <!-- Dynamically populated based on selected Level -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ai-prompt">Mô tả ý tưởng đề bài mong muốn (Tùy chọn)</label>
+            <textarea id="ai-prompt" class="form-control" rows="2" placeholder="Ví dụ: Một bài toán về robot thu thập kim cương trong hang động..."></textarea>
+          </div>
+
+          <button type="button" id="ai-generate-btn" class="btn btn-info btn-block">
+            <i class="bi bi-cpu"></i> <span id="ai-btn-text">SINH ĐỀ & THIẾT LẬP BẰNG AI</span>
+            <div id="ai-btn-spinner" class="spinner"></div>
+          </button>
+        </div>
+
+        <!-- Advanced Editing Section (Collapsible) -->
+        <div class="advanced-collapsible-wrapper">
+          <button type="button" id="toggle-editor-btn" class="btn btn-outline-secondary btn-block btn-sm">
+            <i class="bi bi-chevron-down"></i> Tùy chỉnh chi tiết đề & Lời giải (Nâng cao)
+          </button>
+          
+          <div id="advanced-editor-fields" style="display: none; margin-top: 20px;">
+            <!-- Basic Info -->
+            <div class="form-row">
+              <div class="form-group col-8">
+                <label for="problem-title">Tên bài toán</label>
+                <input type="text" id="problem-title" class="form-control" placeholder="Ví dụ: TỔNG ƯỚC SỐ LẺ LỚN NHẤT">
+              </div>
+              <div class="form-group col-4">
+                <label for="problem-code">Mã bài (File nộp)</label>
+                <input type="text" id="problem-code" class="form-control" placeholder="Ví dụ: TONGLE">
+              </div>
+            </div>
+
+            <!-- Problem Statement Details -->
+            <div class="form-group">
+              <div class="label-with-hint">
+                <label for="problem-description">Đề bài / Yêu cầu bài toán</label>
+                <span class="hint">Bọc biến trong dấu <code>~</code> (Ví dụ: <code>~N~</code>)</span>
+              </div>
+              <textarea id="problem-description" class="form-control code-font" rows="5"></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-6">
+                <label for="problem-input-desc">Đầu vào (Input)</label>
+                <textarea id="problem-input-desc" class="form-control code-font" rows="3"></textarea>
+              </div>
+              <div class="form-group col-6">
+                <label for="problem-output-desc">Đầu ra (Output)</label>
+                <textarea id="problem-output-desc" class="form-control code-font" rows="3"></textarea>
+              </div>
+            </div>
+
+            <!-- Subtasks Configuration -->
+            <div class="subtasks-section">
+              <div class="section-title-wrapper">
+                <h3><i class="bi bi-diagram-3"></i> Cấu hình Subtasks</h3>
+                <button type="button" id="add-subtask-btn" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-plus-circle"></i> Thêm Subtask
+                </button>
+              </div>
+              <div id="subtasks-list" class="subtasks-list">
+                <!-- Dynamic Subtasks here -->
+              </div>
+            </div>
+
+            <!-- Predefined Samples -->
+            <div class="samples-section">
+              <div class="section-title-wrapper">
+                <h3><i class="bi bi-table"></i> Ví dụ mẫu (Sample Tests)</h3>
+                <button type="button" id="add-sample-btn" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-plus-circle"></i> Thêm ví dụ
+                </button>
+              </div>
+              <div id="samples-list" class="samples-list">
+                <!-- Dynamic Sample Tests here -->
+              </div>
+            </div>
+
+
+        <!-- Solver logic & input generator configuration -->
+        <div class="developer-section">
+          <div class="section-title-wrapper">
+            <h3><i class="bi bi-braces"></i> Lập trình Sinh dữ liệu & Lời giải tự động</h3>
+          </div>
+          <div class="form-group">
+            <label for="js-input-generator">Hàm Javascript sinh Input ngẫu nhiên cho một Subtask:</label>
+            <div class="editor-subtext">Hàm nhận vào tham số <code>subtaskId</code> (1, 2, 3,...) và trả về chuỗi kí tự Input.</div>
+            <textarea id="js-input-generator" class="form-control code-editor" rows="6"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="js-solver">Hàm Javascript giải bài toán (Tạo Output tương ứng):</label>
+            <div class="editor-subtext">Hàm nhận vào chuỗi ký tự <code>inputStr</code> và trả về kết quả <code>outputStr</code>.</div>
+            <textarea id="js-solver" class="form-control code-editor" rows="8"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="sol-code-py">Mã giải mẫu Python (Hiển thị trong đề bài):</label>
+            <textarea id="sol-code-py" class="form-control code-editor" rows="5"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="sol-code-cpp">Mã giải mẫu C++ (Hiển thị trong đề bài):</label>
+            <textarea id="sol-code-cpp" class="form-control code-editor" rows="5"></textarea>
+          </div>
+        </div>
+      </div></div> <!-- Closes advanced-editor-fields & advanced-collapsible-wrapper -->
+      </div> <!-- Closes panel-body -->
+      
+      <div class="panel-footer">
+        <button id="generate-tests-btn" class="btn btn-primary btn-lg btn-block">
+          <i class="bi bi-lightning-charge-fill"></i> Tự động sinh bộ Testcases mới
+        </button>
+      </div>
+    </section>
+
+    <!-- Right Panel: Previews, Testcases & Solutions -->
+    <section class="panel preview-panel">
+      <div class="panel-header tab-header">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="tab-doc">
+            <i class="bi bi-file-earmark-markdown"></i> Xem trước Đề bài
+          </button>
+          <button class="tab-btn" data-tab="tab-cases">
+            <i class="bi bi-archive"></i> Bộ Testcases (<span id="testcases-count">0</span>)
+          </button>
+          <button class="tab-btn" data-tab="tab-solutions">
+            <i class="bi bi-filetype-py"></i> Lời giải mẫu
+          </button>
+          <button class="tab-btn" data-tab="tab-bank">
+            <i class="bi bi-database"></i> Ngân hàng đề (<span id="bank-count">0</span>)
+          </button>
+        </div>
+        <div class="quick-export-actions">
+          <button id="export-full-zip-btn" class="btn btn-sm btn-success" title="Tải trọn bộ Đề, Lời giải & Testcases (.zip)">
+            <i class="bi bi-file-earmark-zip-fill"></i> Tải Trọn Bộ Đề & Testcase (.zip)
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-body tab-content-wrapper">
+        <!-- Tab 1: Live Render of Problem Document -->
+        <div id="tab-doc" class="tab-pane active">
+          <div class="markdown-preview-container">
+            <div id="problem-document-render" class="problem-document">
+              <!-- Rendered document will go here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Testcases List -->
+        <div id="tab-cases" class="tab-pane">
+          <div class="testcases-control-header">
+            <h3>Danh sách các testcase được sinh ngẫu nhiên</h3>
+            <span class="badge badge-info">Độ bao phủ subtask: 100%</span>
+          </div>
+          <div class="testcases-list-wrapper">
+            <table class="testcases-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Số thứ tự</th>
+                  <th style="width: 120px;">Phân nhóm</th>
+                  <th>Dữ liệu vào (Input)</th>
+                  <th>Kết quả ra (Output)</th>
+                </tr>
+              </thead>
+              <tbody id="testcases-table-body">
+                <!-- Testcases table entries will be injected here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 3: Pre-formatted Solutions -->
+        <div id="tab-solutions" class="tab-pane">
+          <div class="solutions-container">
+            <div class="solution-block">
+              <div class="solution-title">
+                <span><i class="bi bi-filetype-py"></i> Lời giải mẫu Python</span>
+                <button class="btn btn-sm btn-outline-secondary btn-copy" data-target="python-solution-code">
+                  <i class="bi bi-copy"></i> Sao chép
+                </button>
+              </div>
+              <pre class="code-block-wrapper"><code id="python-solution-code" class="code-font"># Python code placeholder</code></pre>
+            </div>
+            
+            <div class="solution-block">
+              <div class="solution-title">
+                <span><i class="bi bi-filetype-cpp"></i> Lời giải mẫu C++</span>
+                <button class="btn btn-sm btn-outline-secondary btn-copy" data-target="cpp-solution-code">
+                  <i class="bi bi-copy"></i> Sao chép
+                </button>
+              </div>
+              <pre class="code-block-wrapper"><code id="cpp-solution-code" class="code-font">// C++ code placeholder</code></pre>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab 4: Question Bank -->
+        <div id="tab-bank" class="tab-pane">
+          <div class="testcases-control-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>Ngân hàng các đề bài đã sinh & lưu trữ</h3>
+            <button id="clear-bank-btn" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i> Xóa toàn bộ ngân hàng
+            </button>
+          </div>
+          <div class="testcases-list-wrapper">
+            <table class="testcases-table">
+              <thead>
+                <tr>
+                  <th style="width: 150px;">Mã bài / Cấp độ</th>
+                  <th>Tên bài toán</th>
+                  <th style="width: 100px;">Số test</th>
+                  <th style="width: 160px;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="bank-table-body">
+                <!-- Question bank entries will go here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification System -->
+  <div id="toast" class="toast-notification"></div>
+
+  <!-- Javascript Modules -->
+  <script src="templates.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

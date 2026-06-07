@@ -1,0 +1,17 @@
+# Logs
+*.log
+pinggy.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Local Vercel folder
+.vercel/
+
+# Environment variables
+.env
+.env*.local
