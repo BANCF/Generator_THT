@@ -1076,6 +1076,11 @@ function setupEventListeners() {
     populateAITopics(e.target.value);
   });
 
+  // AI Difficulty change listener
+  document.getElementById("ai-difficulty").addEventListener("change", (e) => {
+    localStorage.setItem("ai_difficulty", e.target.value);
+  });
+
   // AI Generate button listener
   document.getElementById("ai-generate-btn").addEventListener("click", async () => {
     const provider = document.getElementById("ai-provider").value.trim();
@@ -1104,7 +1109,8 @@ function setupEventListeners() {
     btnText.textContent = "ĐANG SINH ĐỀ VỚI AI...";
     spinner.style.display = "block";
 
-    const systemPrompt = getAISystemPrompt(level, topic);
+    const difficulty = document.getElementById("ai-difficulty") ? document.getElementById("ai-difficulty").value : "medium";
+    const systemPrompt = getAISystemPrompt(level, topic, difficulty);
     const userPrompt = customPrompt 
       ? `Ý tưởng chi tiết: ${customPrompt}` 
       : `Hãy sinh một bài toán lập trình hấp dẫn, độ khó phù hợp với khối thi đã chọn.`;
@@ -1452,10 +1458,14 @@ function initAISettings() {
   const apiKey = localStorage.getItem("ai_key") || "";
   const endpoint = localStorage.getItem("ai_endpoint") || "http://localhost:11434/v1";
   const aiLevel = document.getElementById("ai-level").value || "cap2";
+  const difficulty = localStorage.getItem("ai_difficulty") || "medium";
 
   document.getElementById("ai-provider").value = provider;
   document.getElementById("ai-key").value = apiKey;
   document.getElementById("ai-endpoint").value = endpoint;
+  if (document.getElementById("ai-difficulty")) {
+    document.getElementById("ai-difficulty").value = difficulty;
+  }
 
   populateAITopics(aiLevel);
   toggleEndpointField(provider);
@@ -1489,19 +1499,39 @@ function toggleEndpointField(provider) {
   }
 }
 
-function getAISystemPrompt(level, topic) {
+function getAISystemPrompt(level, topic, difficulty) {
   let levelDesc = level === "cap1" 
     ? "Tiểu học (cấp 1) sử dụng ngôn ngữ Scratch. Các bài toán vẽ hình Scratch cần tính quãng đường, số bước vẽ hoặc góc xoay, hoặc các bài toán số học đơn giản."
-    : "THCS (cấp 2) sử dụng ngôn ngữ C++ và Python. Thuật toán có thể từ cơ bản đến trung bình (Quy hoạch động, Số học, Tìm kiếm nhị phân, Hai con trỏ, Mảng, Xâu kí tự, Đồ thị...).";
+    : "THCS (cấp 2) sử dụng ngôn ngữ C++ và Python. Thuật toán từ cơ bản đến nâng cao.";
+
+  let difficultyDesc = "";
+  if (difficulty === "easy") {
+    difficultyDesc = "Độ khó: DỄ/CƠ BẢN. Ràng buộc các biến số nhỏ (ví dụ N <= 100 hoặc N <= 1000). Giải thuật yêu cầu chỉ là duyệt trâu (Brute force), sắp xếp đơn giản, hoặc tính toán công thức toán học cơ bản, xử lý mảng 1 chiều cơ bản.";
+  } else if (difficulty === "hard") {
+    difficultyDesc = "Độ khó: KHÓ/NÂNG CAO. Ràng buộc các biến số lớn (ví dụ N <= 10^5 hoặc N <= 10^18). Giải thuật yêu cầu tối ưu cao như Quy hoạch động nâng cao, thuật toán đồ thị phức tạp (Dijkstra, MST, BFS/DFS nâng cao), cấu trúc dữ liệu nâng cao (Segment Tree, Fenwick Tree, Disjoint Set Union), toán học tổ hợp/lũy thừa nhanh.";
+  } else {
+    difficultyDesc = "Độ khó: TRUNG BÌNH. Ràng buộc biến số ở mức trung bình (ví dụ N <= 10^4 hoặc 10^5). Giải thuật yêu cầu áp dụng các kỹ thuật như Tham lam (Greedy), Hai con trỏ (Two Pointers), Cửa sổ trượt (Sliding Window), Sàng nguyên tố Euler, Quy hoạch động cơ bản, tìm kiếm nhị phân.";
+  }
 
   return `Bạn là một chuyên gia ra đề thi học sinh giỏi Tin học Trẻ cấp quốc gia và quốc tế.
 Hãy tạo một đề bài lập trình thi đấu (Competitive Programming) bằng tiếng Việt cho đối tượng: ${levelDesc}
 Chủ đề bài toán: ${topic}.
+Yêu cầu về độ phức tạp và độ khó thuật toán: ${difficultyDesc}
 
 YÊU CẦU ĐẶC BIỆT VỀ NGÔN NGỮ LẬP TRÌNH TRONG CÁC TRƯỜNG DỮ LIỆU:
 1. Trường 'generateInput' và 'solve' PHẢI là mã nguồn JavaScript chạy trên trình duyệt (client-side) để sinh dữ liệu và giải bài toán trực tiếp.
 2. Trường 'solutionCodePython' PHẢI là mã nguồn giải mẫu hoàn chỉnh viết bằng ngôn ngữ PYTHON 3 (chạy được, không viết JavaScript hay mã giả ở đây).
 3. Trường 'solutionCodeCpp' PHẢI là mã nguồn giải mẫu hoàn chỉnh viết bằng ngôn ngữ C++ (biên dịch được, không viết JavaScript hay mã giả ở đây).
+
+QUY TẮC CỰC KỲ QUAN TRỌNG VỀ ĐỀ BÀI VÀ MÃ NGUỒN:
+1. Đề bài PHẢI được viết hoàn toàn bằng TIẾNG VIỆT chuẩn, tự nhiên. Tuyệt đối KHÔNG chứa bất kỳ chữ tiếng Trung (như 左上角, 右下角,...), tiếng Anh (trừ tên biến, tên thuật toán) hay ký tự lạ nào khác trong đề bài hoặc chú thích.
+2. Hãy đảm bảo logic của Hàm Sinh Input ('generateInput') và Hàm Giải bài toán ('solve') bằng JavaScript khớp hoàn toàn với mô tả đề bài và bổ trợ cho nhau một cách hoàn hảo. 
+   Ví dụ: Nếu đề bài yêu cầu đầu vào gồm nhiều dòng hoặc ma trận, thì Hàm Sinh Input phải sinh đúng định dạng dòng cột đó và Hàm Giải bài toán phải đọc/tách dòng (dùng .split('\\n')) một cách chuẩn xác để lấy dữ liệu. Tránh sinh đầu vào là ma trận mà hàm giải chỉ đọc một số duy nhất.
+3. Ràng buộc về giá trị tối thiểu/tối đa (minVal, maxVal) trong mỗi subtask phải phản ánh đúng độ khó đã chỉ định. Hãy cấu hình minVal và maxVal trong subtask và đọc chúng từ 'thisSubtask.minVal' và 'thisSubtask.maxVal' trong hàm 'generateInput' một cách chính xác.
+4. Tên nhân vật và bối cảnh trong đề bài sinh ra PHẢI sử dụng chính xác các từ khóa sau để hệ thống tự động thay thế ngẫu nhiên:
+   - Tên nhân vật: sử dụng từ khóa "Bo" hoặc "Tèo" hoặc "Tí" trong cốt truyện.
+   - Bối cảnh: sử dụng từ khóa "vương quốc VNOI" hoặc "trang trại số học" hoặc "lớp học Tin học" trong cốt truyện.
+   Không được tự chế ra các tên riêng tiếng Việt hoặc tiếng Trung khác không thuộc bộ này.
 
 Yêu cầu định dạng đề bài:
 1. Đề bài phải có cốt truyện sinh động, lôi cuốn, có nhân vật và bối cảnh (như trong các đề thi VNOJ, Codeforces, LQDOJ).
