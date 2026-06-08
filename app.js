@@ -1648,7 +1648,12 @@ async function callAIApi(provider, apiKey, model, endpoint, systemPrompt, userPr
     if (!isThinkingModel) {
       payload.generationConfig = {
         responseMimeType: "application/json",
-        responseSchema: schema
+        responseSchema: schema,
+        maxOutputTokens: 4096
+      };
+    } else {
+      payload.generationConfig = {
+        maxOutputTokens: 4096
       };
     }
 
@@ -1727,7 +1732,8 @@ async function callAIApi(provider, apiKey, model, endpoint, systemPrompt, userPr
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      max_tokens: 4096
     };
 
     const headers = {
@@ -1769,7 +1775,8 @@ async function callAIApi(provider, apiKey, model, endpoint, systemPrompt, userPr
         messages: [
           { role: "system", content: systemPrompt + "\n\nLƯU Ý QUAN TRỌNG: Bạn PHẢI phản hồi bằng một JSON Object duy nhất và hợp lệ." },
           { role: "user", content: userPrompt }
-        ]
+        ],
+        max_tokens: 4096
       };
       response = await fetch(url, {
         method: "POST",
