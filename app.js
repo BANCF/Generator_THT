@@ -370,7 +370,7 @@ function renderSamplesList() {
   });
 }
 
-// Custom Markdown renderer replacing `~` with math-styled span
+// Custom Markdown renderer leaving math delimiters intact for KaTeX
 function formatMarkdown(text) {
   if (!text) return "";
   
@@ -379,9 +379,6 @@ function formatMarkdown(text) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-
-  // Format ~...~ as math expression
-  escaped = escaped.replace(/~([^~]+)~/g, '<span class="math-expr">$1</span>');
 
   // Format **text** as strong
   escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -467,13 +464,25 @@ function renderProblemDocument() {
     subtaskUl.appendChild(li);
   });
   
-  // Format math inside lists
-  subtaskUl.innerHTML = subtaskUl.innerHTML.replace(/~([^~]+)~/g, '<span class="math-expr">$1</span>');
   container.appendChild(subtaskUl);
 
   // Update Solution codes in Tab 3
   document.getElementById("python-solution-code").textContent = currentProblem.solutionCodePython;
   document.getElementById("cpp-solution-code").textContent = currentProblem.solutionCodeCpp;
+
+  // Trigger KaTeX math rendering on the entire document container
+  if (window.renderMathInElement) {
+    window.renderMathInElement(container, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+        {left: '~', right: '~', display: false},
+        {left: '\\(', right: '\\)', display: false},
+        {left: '\\[', right: '\\]', display: true}
+      ],
+      throwOnError: false
+    });
+  }
 }
 
 // Generate the 10+ Testcases
