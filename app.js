@@ -109,6 +109,7 @@ function randomizeProblemText(text, characterName, contextName) {
 // Populate template list based on selected level
 function populateTemplates() {
   const levelSelect = document.getElementById("problem-level");
+  if (!levelSelect) return;
   const selectedLevel = levelSelect.value;
   const select = document.getElementById("template-select");
   
@@ -218,7 +219,8 @@ function triggerProblemGeneration(template) {
   // Set basic inputs in editor
   document.getElementById("problem-title").value = currentProblem.title;
   document.getElementById("problem-code").value = currentProblem.code;
-  document.getElementById("problem-level").value = currentProblem.level;
+  const problemLevelEl = document.getElementById("problem-level");
+  if (problemLevelEl) problemLevelEl.value = currentProblem.level;
   document.getElementById("problem-description").value = currentProblem.description;
   document.getElementById("problem-input-desc").value = currentProblem.inputDesc;
   document.getElementById("problem-output-desc").value = currentProblem.outputDesc;
@@ -756,7 +758,8 @@ function loadProblemFromBank(id) {
   // Set UI
   document.getElementById("problem-title").value = currentProblem.title;
   document.getElementById("problem-code").value = currentProblem.code;
-  document.getElementById("problem-level").value = currentProblem.level;
+  const problemLevelEl2 = document.getElementById("problem-level");
+  if (problemLevelEl2) problemLevelEl2.value = currentProblem.level;
   document.getElementById("problem-description").value = currentProblem.description;
   document.getElementById("problem-input-desc").value = currentProblem.inputDesc;
   document.getElementById("problem-output-desc").value = currentProblem.outputDesc;
@@ -1127,7 +1130,8 @@ function setupEventListeners() {
 
       document.getElementById("problem-title").value = currentProblem.title;
       document.getElementById("problem-code").value = currentProblem.code;
-      document.getElementById("problem-level").value = currentProblem.level;
+      const problemLevelEl3 = document.getElementById("problem-level");
+      if (problemLevelEl3) problemLevelEl3.value = currentProblem.level;
       document.getElementById("problem-description").value = currentProblem.description;
       document.getElementById("problem-input-desc").value = currentProblem.inputDesc;
       document.getElementById("problem-output-desc").value = currentProblem.outputDesc;
