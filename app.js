@@ -508,11 +508,11 @@ function generateTestcases() {
   try {
     const generatorBody = document.getElementById("js-input-generator").value;
     // We bind the generator function context to currentProblem so it can read subtask constraints
-    genInputFn = new Function("subtaskId", `
-      const subtasks = ${JSON.stringify(currentProblem.subtasks)};
-      const thisSubtask = subtasks[subtaskId - 1];
-      ${generatorBody}
-    `);
+    genInputFn = new Function("subtaskId", 
+      "const subtasks = " + JSON.stringify(currentProblem.subtasks) + ";\n" +
+      "const thisSubtask = subtasks[subtaskId - 1];\n" +
+      generatorBody
+    );
   } catch (err) {
     showToast("Lỗi biên dịch Hàm Sinh Input: " + err.message, "error");
     return;
