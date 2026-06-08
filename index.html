@@ -48,40 +48,6 @@
       </div>
       
       <div class="panel-body">
-        <!-- Main Quick Config Card -->
-        <div class="generator-variables-card">
-          <div class="form-group">
-            <label for="problem-level">Khối thi / Cấp học</label>
-            <select id="problem-level" class="form-select">
-              <option value="cap1">Tiểu học (Cấp 1 - Lập trình Scratch)</option>
-              <option value="cap2" selected>THCS (Cấp 2 - Lập trình C++ / Python)</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="template-select">Chọn Dạng đề bài ôn luyện</label>
-            <select id="template-select" class="form-select">
-              <!-- Dynamically populated based on Level -->
-            </select>
-          </div>
-          
-          <div class="form-group" id="variation-select-group">
-            <label for="variation-select">Chọn Biến thể / Kiểu đề bài</label>
-            <select id="variation-select" class="form-select">
-              <!-- Dynamically populated based on selected Template -->
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="problem-num-tests">Số lượng testcase sinh ra (Tối thiểu 10)</label>
-            <input type="number" id="problem-num-tests" class="form-control" min="10" max="50" value="10">
-          </div>
-
-          <button type="button" id="trigger-generation-btn" class="btn btn-primary btn-block">
-            <i class="bi bi-lightning-charge-fill"></i> SINH ĐỀ BÀI & TẢI BỘ TESTCASE
-          </button>
-        </div>
-
         <!-- AI Generator Card (Ollama Only) -->
         <div class="generator-variables-card ai-generator-card">
           <div class="ai-card-title">
@@ -131,6 +97,11 @@
           <div class="form-group">
             <label for="ai-prompt">Mô tả ý tưởng đề bài mong muốn (Tùy chọn)</label>
             <textarea id="ai-prompt" class="form-control" rows="2" placeholder="Ví dụ: Một bài toán về robot thu thập kim cương trong hang động..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="problem-num-tests">Số lượng testcase sinh ra (Tối thiểu 10)</label>
+            <input type="number" id="problem-num-tests" class="form-control" min="10" max="100" value="10">
           </div>
 
           <button type="button" id="ai-generate-btn" class="btn btn-info btn-block">

@@ -487,7 +487,11 @@ function renderProblemDocument() {
 
 // Generate the 10+ Testcases
 function generateTestcases() {
-  const totalTestsInput = parseInt(document.getElementById("problem-num-tests").value) || 10;
+  let totalTestsInput = parseInt(document.getElementById("problem-num-tests").value) || 10;
+  if (totalTestsInput < 10) {
+    totalTestsInput = 10;
+    document.getElementById("problem-num-tests").value = 10;
+  }
   const numSubtasks = currentProblem.subtasks.length;
   
   if (numSubtasks === 0) {
@@ -889,30 +893,6 @@ function setupEventListeners() {
     }
   });
 
-  // Template select dropdown
-  document.getElementById("template-select").addEventListener("change", (e) => {
-    loadTemplate(e.target.value);
-  });
-
-  // Variation select dropdown
-  document.getElementById("variation-select").addEventListener("change", (e) => {
-    const templateId = document.getElementById("template-select").value;
-    const template = window.examTemplates.find(t => t.id === templateId);
-    if (template) {
-      triggerProblemGeneration(template);
-    }
-  });
-
-  // Dynamic generate trigger button
-  document.getElementById("trigger-generation-btn").addEventListener("click", () => {
-    const templateId = document.getElementById("template-select").value;
-    const template = window.examTemplates.find(t => t.id === templateId);
-    if (template) {
-      triggerProblemGeneration(template);
-      showToast("Đã tái tạo đề bài & testcase mới theo cấu hình tự động!");
-    }
-  });
-
   // Basic info change event listeners
   document.getElementById("problem-title").addEventListener("input", (e) => {
     currentProblem.title = e.target.value;
@@ -922,11 +902,6 @@ function setupEventListeners() {
   document.getElementById("problem-code").addEventListener("input", (e) => {
     currentProblem.code = e.target.value;
     renderProblemDocument();
-  });
-
-  document.getElementById("problem-level").addEventListener("change", (e) => {
-    currentProblem.level = e.target.value;
-    populateTemplates(); // Auto-update templates dropdown
   });
 
   // Toggle advanced editor fields collapse/expand
@@ -1192,7 +1167,6 @@ function setupEventListeners() {
 
 // Start Application
 window.addEventListener("DOMContentLoaded", () => {
-  initTemplates();
   initAISettings();
   setupEventListeners();
   renderQuestionBankTable();
